@@ -1,220 +1,158 @@
-<!doctype html>
-<html lang="ru">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#203247">
-<title>Дневник воркаута — 8 недель</title>
-<style>
-:root{--navy:#203247;--blue:#eaf1f6;--line:#d7e0e7;--muted:#647486;--bg:#f4f6f8;--white:#fff;--green:#e5f3e9}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:#18232e;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
-header{background:var(--navy);color:white;padding:22px 18px 18px}
-header h1{font-size:22px;margin:0 0 5px}
-header p{font-size:13px;opacity:.85;margin:0;line-height:1.4}
-main{max-width:680px;margin:auto;padding:14px 12px 34px}
-.card{background:white;border:1px solid var(--line);border-radius:16px;padding:14px;margin:0 0 12px;box-shadow:0 2px 8px #1b2b3a0a}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
-select,input,textarea,button{font:inherit}
-select,input,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px;background:white;color:#18232e;min-height:42px}
-button{border:0;border-radius:11px;padding:11px 14px;background:var(--navy);color:white;font-weight:600}
-button.secondary{background:var(--blue);color:var(--navy)}
-button.danger{background:#f8e8e8;color:#8b2525}
-button:active{transform:scale(.98)}
-.controls{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-h2{font-size:17px;margin:0 0 10px;color:var(--navy)}
-h3{font-size:14px;margin:0 0 8px;color:var(--navy)}
-.small{font-size:12px;color:var(--muted);line-height:1.45}
-.exercise{border:1px solid var(--line);border-radius:12px;padding:11px;margin:9px 0;background:#fff}
-.exercise.done{background:var(--green);border-color:#b8d7c0}
-.ex-top{display:flex;gap:8px;align-items:flex-start}
-.ex-name{font-weight:650;font-size:14px;line-height:1.35;flex:1}
-.plan{font-size:12px;color:var(--muted);white-space:nowrap}
-.check{width:24px;height:24px;min-height:24px;accent-color:#287b48;flex:none}
-.fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.fields label{font-size:11px}
-.fields input{padding:9px;font-size:14px;min-height:38px}
-.note{margin-top:10px}
-.note textarea{min-height:58px;resize:vertical}
-.pill{background:var(--blue);color:var(--navy);padding:5px 9px;border-radius:99px;font-size:11px;font-weight:600}
-.progress{height:9px;border-radius:20px;background:#e8edf1;overflow:hidden;margin:8px 0}
-.progress>span{display:block;height:100%;background:#43835a;width:0}
-.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.stat{background:var(--blue);border-radius:11px;padding:10px}
-.stat b{display:block;font-size:20px;color:var(--navy)}
-.stat span{font-size:10px;color:var(--muted)}
-.footer{font-size:11px;color:var(--muted);text-align:center;padding:12px}
-.hidden{display:none}
-@media(min-width:560px){main{padding:20px}.exercise{padding:14px}}
-</style>
-</head>
-<body>
-<header>
-  <h1>Дневник воркаута</h1>
-  <p>Персональный план на 8 недель · 2 тренировки в неделю</p>
-</header>
-<main>
-  <section class="card">
-    <div class="statgrid">
-      <div class="stat"><b id="doneCount">0</b><span>упражнений отмечено</span></div>
-      <div class="stat"><b id="totalCount">96</b><span>всего записей</span></div>
-      <div class="stat"><b id="percent">0%</b><span>выполнение</span></div>
-    </div>
-    <div class="progress"><span id="bar"></span></div>
-    <p class="small">Отметки и записи сохраняются автоматически на этом устройстве в браузере.</p>
-  </section>
-
-  <section class="card">
-    <h2>Выбери тренировку</h2>
-    <div class="controls">
-      <div><label for="week">Неделя</label><select id="week"></select></div>
-      <div><label for="session">Тренировка</label><select id="session"><option value="A">А — тяга и жим</option><option value="B">Б — плечи, ноги и корпус</option></select></div>
-    </div>
-    <p id="weekHint" class="small" style="margin:10px 0 0"></p>
-  </section>
-
-  <section class="card">
-    <div class="row" style="justify-content:space-between">
-      <h2 id="sessionTitle">Тренировка А</h2><span class="pill" id="sessionBadge">6 упражнений</span>
-    </div>
-    <div id="exerciseList"></div>
-    <div class="note">
-      <label for="sessionDate">Дата тренировки</label><input type="date" id="sessionDate">
-    </div>
-    <div class="note">
-      <label for="sessionFeeling">Самочувствие после тренировки (1–5)</label>
-      <select id="sessionFeeling"><option value="">Не указано</option><option>1 — очень тяжело</option><option>2 — тяжело</option><option>3 — нормально</option><option>4 — хорошо</option><option>5 — отлично</option></select>
-    </div>
-    <div class="note">
-      <label for="sessionNotes">Заметки</label><textarea id="sessionNotes" placeholder="Например: подтягивания дались легче, в тяге добавил 2 кг..."></textarea>
-    </div>
-  </section>
-
-  <section class="card">
-    <h2>Подготовка к элементам</h2>
-    <div id="skillText" class="small"></div>
-  </section>
-
-  <section class="card">
-    <h2>Итоги и контроль прогресса</h2>
-    <div class="fields">
-      <div><label>Подтягивания в начале</label><input id="basePull" inputmode="numeric" placeholder="3–5"></div>
-      <div><label>Подтягивания сейчас</label><input id="nowPull" inputmode="numeric" placeholder="Результат"></div>
-      <div><label>Отжимания в начале</label><input id="basePush" inputmode="numeric" placeholder="11–20"></div>
-      <div><label>Отжимания сейчас</label><input id="nowPush" inputmode="numeric" placeholder="Результат"></div>
-      <div><label>Вис в начале (сек.)</label><input id="baseHang" inputmode="numeric"></div>
-      <div><label>Вис сейчас (сек.)</label><input id="nowHang" inputmode="numeric"></div>
-    </div>
-    <div class="note"><label>Цели на следующий цикл</label><textarea id="nextGoals" placeholder="Что хочу улучшить дальше..."></textarea></div>
-  </section>
-
-  <section class="card">
-    <h2>Резервная копия</h2>
-    <p class="small">Скачай копию записей, чтобы не потерять их при смене телефона или очистке данных браузера.</p>
-    <div class="row">
-      <button id="exportBtn">Экспортировать записи</button>
-      <button class="secondary" id="importBtn">Импортировать копию</button>
-      <input class="hidden" type="file" id="importFile" accept="application/json">
-    </div>
-    <p id="backupMsg" class="small" aria-live="polite"></p>
-  </section>
-  <div class="footer">Работай без отказа, оставляй 2–3 повтора в запасе. При боли прекращай упражнение.</div>
-</main>
-<script>
-const workouts={
- A:[
- ["Подтягивания / гравитрон","4 × 2–3"],
- ["Брусья с помощью / жим в тренажёре","3 × 6–8"],
- ["Австралийские подтягивания","3 × 8–10"],
- ["Отжимания от пола","3 × 8–12"],
- ["Подъём коленей в висе","3 × 8–10"],
- ["Hollow Body Hold","3 × 15–20 сек."]
- ],
- B:[
- ["Тяга верхнего блока","3 × 10"],
- ["Pike push-up / жим гантелей вверх","2–3 × 6–8"],
- ["Болгарские приседания","3 × 8 на ногу"],
- ["Горизонтальная тяга блока","3 × 10"],
- ["Планка","3 × 25–30 сек."],
- ["Упор на брусьях с поддержкой","3 × 10–20 сек."]
- ]
-};
-const weekNotes=[
- ["Освоение техники","Подбери лёгкие веса. Оставляй 2–3 повтора в запасе, не проверяй максимум."],
- ["Закрепление","Повтори нагрузки. Если легко и техника стабильна — добавь 1 повтор в отдельных подходах."],
- ["Небольшой прогресс","Добавь повтор там, где остаётся запас 2–3 повтора. Не повышай вес одновременно."],
- ["Облегчённая неделя","Сделай на 30–40% меньше подходов и снизь рабочие веса примерно на 10–15%."],
- ["Возврат к объёму","Вернись к обычному числу подходов. При уверенной технике добавь минимальный вес в тягах."],
- ["Развитие силы","Подтягивания 4 × 2–4. Если тяжело — используй помощь гравитрона или резинки."],
- ["Закрепление","Работай над контролем и качеством, не гонись за рекордами."],
- ["Контроль результатов","Сравни чистые повторы, вис и удержания с началом цикла. Не тестируйся до отказа."]
-];
-const skillA="Лопаточные подтягивания — 2 × 6; tuck hold в висе — 3 × 8–10 секунд.";
-const skillB="Planche Lean на паралетс — 3 × 8–10 секунд без боли; упор на брусьях — по плану выше.";
-const $=id=>document.getElementById(id);
-const key="workoutDiaryIphoneV1";
-let state={entries:{},profile:{}};
-function load(){try{const s=localStorage.getItem(key);if(s)state=JSON.parse(s)}catch(e){}}
-function save(){localStorage.setItem(key,JSON.stringify(state));updateStats()}
-function entryKey(){return $("week").value+"_"+$("session").value}
-function current(){const k=entryKey();if(!state.entries[k])state.entries[k]={exercises:{},date:"",feeling:"",notes:""};return state.entries[k]}
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#152c3c"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Мой Full Body"><title>Full Body — 12 недель</title><style>
+:root{color-scheme:light;--ink:#152c3c;--muted:#617382;--line:#dce6e9;--bg:#f3f7f8;--teal:#137e78}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:720px;margin:auto;padding:18px 15px 65px}header{padding:23px 20px;border-radius:22px;background:#152c3c;color:white}h1{font-size:26px;line-height:1.12;margin:7px 0}h2{font-size:19px;margin:0 0 12px}.sub{color:#d0e0e5;font-size:13px;line-height:1.5}.pill{display:inline-block;border-radius:30px;padding:5px 10px;background:#285064;color:#d8fbf5;font-size:12px}.card{background:white;border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:14px;box-shadow:0 3px 13px #19394a08}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.muted{color:var(--muted);font-size:13px}.weeks{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;margin-top:12px}.wk{border:1px solid #cfdfe2;border-radius:11px;background:white;padding:12px 0;font-weight:700;color:var(--ink);font-size:14px}.wk.active{background:var(--ink);color:white;border-color:var(--ink)}.wk.done{box-shadow:inset 0 -4px var(--teal)}input,textarea,button{font:inherit}input[type=date],input[type=number],input[type=text],textarea{border:1px solid #d2e0e4;border-radius:10px;background:#fbfdfd;padding:11px;color:var(--ink);width:100%;min-width:0;font-size:16px}textarea{resize:vertical;min-height:80px}.field{display:block;font-size:12px;color:var(--muted);font-weight:600;margin:12px 0 5px}.ex{border-top:1px solid #e7eeee;padding:14px 0}.ex:first-child{border-top:0}.ex-title{display:flex;gap:11px;align-items:flex-start}.ex-title input{width:23px;height:23px;accent-color:var(--teal);margin:1px 0;flex-shrink:0}.ex-name{font-size:15px;font-weight:750}.ex-hint{font-size:12px;color:var(--muted);margin-top:3px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 0 34px}.fields label{font-size:11px;color:var(--muted)}.fields input{margin-top:5px;padding:9px}.meter{height:9px;background:#e6eeee;border-radius:9px;overflow:hidden;margin-top:9px}.meter>div{height:100%;background:var(--teal);width:0;transition:width .2s}.actions{display:flex;flex-wrap:wrap;gap:9px}.btn{border:0;background:var(--ink);color:white;border-radius:11px;padding:11px 14px;font-weight:700}.btn.secondary{background:#e5eff0;color:var(--ink)}.note{font-size:12px;color:var(--muted);line-height:1.5}.tip{background:#eef7f5;padding:11px 13px;border-radius:12px;font-size:13px;line-height:1.55;margin-top:10px}@media(max-width:380px){.weeks{grid-template-columns:repeat(4,1fr)}.fields{margin-left:0}}@media(min-width:520px){.weeks{grid-template-columns:repeat(12,1fr)}}
+.summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}.summary-stat{border:1px solid var(--line);border-radius:12px;padding:11px;background:#f8fbfb}.summary-stat strong{display:block;font-size:19px;color:var(--ink)}.summary-stat span{font-size:12px;color:var(--muted)}.comparison{width:100%;border-collapse:collapse;font-size:12px}.comparison th,.comparison td{text-align:left;padding:9px 5px;border-bottom:1px solid var(--line);vertical-align:top}.comparison th{color:var(--muted)}.up{color:#08776a;font-weight:700}.down{color:#a45a22;font-weight:700}.summary-message{margin:10px 0;line-height:1.55}.set-row{display:grid;grid-template-columns:36px 1fr 1fr;gap:8px;align-items:end;margin:8px 0}.set-row label{font-size:11px;color:var(--muted)}.set-row input{margin-top:4px;padding:9px}.set-number{font-weight:700;font-size:13px;padding-bottom:12px}.set-controls{display:flex;align-items:center;gap:9px;margin:10px 0 0 34px}.set-controls select{border:1px solid var(--line);border-radius:9px;background:white;padding:8px;font-size:16px}.set-list{margin-left:34px}.set-summary{font-size:12px;color:var(--muted);margin:8px 0 0 34px}@media(max-width:380px){.set-controls,.set-list,.set-summary{margin-left:0}}</style></head><body><main><header><span class="pill">12 недель · 1 раз в неделю</span><h1>Мой Full Body</h1><div class="sub">Интерактивный дневник тренировок для iPhone<br>Тренажёры · умеренная нагрузка · все основные группы мышц</div></header><section class="card"><h2>Чей дневник?</h2><div class="actions"><button type="button" class="btn" id="profileMe">Я</button><button type="button" class="btn secondary" id="profileWife">Жена</button></div><p class="note" id="profileNote">Результаты и графики сохраняются отдельно для каждого.</p></section><section class="card"><div class="row"><h2>Выбери неделю</h2><span id="status" class="muted"></span></div><div class="weeks" id="weeks"><button class="wk" disabled>1</button><button class="wk" disabled>2</button><button class="wk" disabled>3</button><button class="wk" disabled>4</button><button class="wk" disabled>5</button><button class="wk" disabled>6</button><button class="wk" disabled>7</button><button class="wk" disabled>8</button><button class="wk" disabled>9</button><button class="wk" disabled>10</button><button class="wk" disabled>11</button><button class="wk" disabled>12</button></div><div class="row" style="margin-top:14px"><div><strong id="weekTitle">Неделя 1</strong><div id="weekTip" class="muted"></div></div><div style="width:155px"><label class="field" for="date">Дата тренировки</label><input type="date" id="date"></div></div><div class="meter"><div id="progress"></div></div><div id="progressText" class="muted" style="margin-top:6px"></div></section><section class="card"><h2>Упражнения</h2><div class="note">Если поля неактивны, открой опубликованный сайт в Safari: просмотрщик файлов iPhone может блокировать JavaScript. Отмечай выполнение и записывай фактическую нагрузку. Для каждого упражнения можно выбрать от 1 до 6 подходов; на эллипсе указывается время. В конце тренировки в гравитроне допускается больше помощи.</div><div id="exerciseList"><div class="ex"><label class="ex-title"><input type="checkbox" disabled><span><span class="ex-name">1. Эллиптический тренажёр</span><div class="ex-hint">10–15 минут · разминка</div></span></label><div class="fields"><label>Время, мин<input disabled placeholder="Открой сайт в Safari"></label><label>Сопротивление<input disabled placeholder="Открой сайт в Safari"></label></div></div><div class="ex"><label class="ex-title"><input type="checkbox" disabled><span><span class="ex-name">2. Подтягивания в гравитроне</span><div class="ex-hint">3 × 8–10 · спина, бицепс</div></span></label><div class="fields"><label>Помощь, кг<input disabled placeholder="Открой сайт в Safari"></label><label>Повторы по подходам<input disabled placeholder="Открой сайт в Safari"></label></div></div><div class="ex"><label class="ex-title"><input type="checkbox" disabled><span><span class="ex-name">3. Разгибание ног сидя</span><div class="ex-hint">2 × 12–15 · квадрицепсы</div></span></label><div class="fields"><label>Вес, кг<input disabled placeholder="Открой сайт в Safari"></label><label>Повторы по подходам<input disabled placeholder="Открой сайт в Safari"></label></div></div><div class="ex"><label class="ex-title"><input type="checkbox" disabled><span><span class="ex-name">4. Сгибание ног лёжа</span><div class="ex-hint">2 × 12–15 · задняя поверхность бедра</div></span></label><div class="fields"><label>Вес, кг<input disabled placeholder="Открой сайт в Safari"></label><label>Повторы по подходам<input disabled placeholder="Открой сайт в Safari"></label></div></div><div class="ex"><label class="ex-title"><input type="checkbox" disabled><span><span class="ex-name">5. Жим от груди в тренажёре</span><div class="ex-hint">2 × 10–12 · грудь, трицепс</div></span></label><div class="fields"><label>Вес, кг<input disabled placeholder="Открой сайт в Safari"></label><label>Повторы по подходам<input disabled placeholder="Открой сайт в Safari"></label></div></div><div class="ex"><label class="ex-title"><input type="checkbox" disabled><span><span class="ex-name">6. Тяга верхнего блока</span><div class="ex-hint">2 × 10–12 · спина</div></span></label><div class="fields"><label>Вес, кг<input disabled placeholder="Открой сайт в Safari"></label><label>Повторы по подходам<input disabled placeholder="Открой сайт в Safari"></label></div></div><div class="ex"><label class="ex-title"><input type="checkbox" disabled><span><span class="ex-name">7. Горизонтальная тяга сидя</span><div class="ex-hint">2 × 10–12 · спина</div></span></label><div class="fields"><label>Вес, кг<input disabled placeholder="Открой сайт в Safari"></label><label>Повторы по подходам<input disabled placeholder="Открой сайт в Safari"></label></div></div><div class="ex"><label class="ex-title"><input type="checkbox" disabled><span><span class="ex-name">8. Разведение ног в тренажёре</span><div class="ex-hint">2 × 12–15 · ягодичные</div></span></label><div class="fields"><label>Вес, кг<input disabled placeholder="Открой сайт в Safari"></label><label>Повторы по подходам<input disabled placeholder="Открой сайт в Safari"></label></div></div><div class="ex"><label class="ex-title"><input type="checkbox" disabled><span><span class="ex-name">9. Сведение ног в тренажёре</span><div class="ex-hint">2 × 12–15 · приводящие мышцы</div></span></label><div class="fields"><label>Вес, кг<input disabled placeholder="Открой сайт в Safari"></label><label>Повторы по подходам<input disabled placeholder="Открой сайт в Safari"></label></div></div><div class="ex"><label class="ex-title"><input type="checkbox" disabled><span><span class="ex-name">10. Жим на плечи в тренажёре</span><div class="ex-hint">2 × 10–12 · плечи</div></span></label><div class="fields"><label>Вес, кг<input disabled placeholder="Открой сайт в Safari"></label><label>Повторы по подходам<input disabled placeholder="Открой сайт в Safari"></label></div></div><div class="ex"><label class="ex-title"><input type="checkbox" disabled><span><span class="ex-name">11. Гиперэкстензия</span><div class="ex-hint">2 × 10–12 · без переразгибания поясницы</div></span></label><div class="fields"><label>Доп. вес, кг<input disabled placeholder="Открой сайт в Safari"></label><label>Повторы по подходам<input disabled placeholder="Открой сайт в Safari"></label></div></div><div class="ex"><label class="ex-title"><input type="checkbox" disabled><span><span class="ex-name">12. Подъёмы коленей или ног в упоре</span><div class="ex-hint">2 × 10–12 · пресс</div></span></label><div class="fields"><label>Вариант<input disabled placeholder="Открой сайт в Safari"></label><label>Повторы по подходам<input disabled placeholder="Открой сайт в Safari"></label></div></div><div class="ex"><label class="ex-title"><input type="checkbox" disabled><span><span class="ex-name">13. Подтягивания в гравитроне (финиш)</span><div class="ex-hint">2 × 8–10 · облегчённый вариант</div></span></label><div class="fields"><label>Помощь, кг<input disabled placeholder="Открой сайт в Safari"></label><label>Повторы по подходам<input disabled placeholder="Открой сайт в Safari"></label></div></div></div></section><section class="card"><h2>Самочувствие и заметки</h2><label class="field" for="feel">Самочувствие</label><select id="feel" style="width:100%;padding:12px;border:1px solid #d2e0e4;border-radius:10px;background:white;font-size:16px"><option value="">Не выбрано</option><option>Отличное</option><option>Хорошее</option><option>Нормальное</option><option>Усталость</option><option>Дискомфорт — снизил нагрузку</option></select><label class="field" for="notes">Заметки</label><textarea id="notes" placeholder="Что получилось, что изменить в следующий раз..."></textarea></section><section class="card"><h2>Итоги недели и контроль прогресса</h2><div id="weeklySummary" class="note" aria-live="polite"></div></section><section class="card"><h2>Общий график прогресса · 12 недель</h2><p class="note">Выбери показатель. График строится автоматически по сохранённым тренировкам, без выдуманных значений.</p><label class="field" for="chartMetric">Показатель</label><select id="chartMetric" style="width:100%;padding:12px;border:1px solid #d2e0e4;border-radius:10px;background:white;font-size:16px"><option value="completed">Выполненные упражнения</option><option value="reps">Сумма повторений</option><option value="cardio">Эллипс — минуты</option><option value="pullAssist">Гравитрон (основной) — помощь, кг</option><option value="pullReps">Гравитрон (основной) — повторы</option><option value="chest">Жим от груди — вес, кг</option><option value="legs">Разгибание ног — вес, кг</option><option value="row">Горизонтальная тяга — вес, кг</option></select><div id="progressChart" role="img" aria-label="График результатов по неделям" style="margin-top:15px;overflow:hidden"></div><div id="chartSummary" class="note" aria-live="polite"></div></section><section class="card"><h2>Рекомендации</h2><div class="tip">Первые 2 недели подбирай комфортные веса и не тренируйся до отказа. Оставляй 2–3 повторения в запасе. Отдых между подходами — 60–120 секунд. На 4-й и 8-й неделях при необходимости снижай нагрузку; на 12-й сравни результаты с первой неделей.</div><p class="note">Разминка на эллипсе — в разговорном темпе. Работай без рывков и боли. Разгибание и сгибание ног не полностью заменяют приседания по нагрузке на ягодицы; разведение ног дополняет их. Если тренировка слишком долгая или устают плечи и локти, сократи вторые подтягивания или одну из тяг.</p></section><section class="card"><h2>Резервная копия</h2><div class="actions"><button class="btn" id="export">Скачать данные</button><button class="btn secondary" id="importBtn">Загрузить данные</button><input type="file" id="importFile" accept="application/json,.json" hidden></div><p class="note">Записи обоих участников хранятся отдельно, но только в этом браузере на этом устройстве. Экспорт сохраняет сразу оба дневника. Перед сменой телефона, очисткой Safari или обновлением приложения сохраняй резервную копию.</p></section></main><script>
+const EX=[['Эллиптический тренажёр','10–15 минут · разминка','Время, мин','Сопротивление'],['Подтягивания в гравитроне','3 × 8–10 · спина, бицепс','Помощь, кг','Повторы по подходам'],['Разгибание ног сидя','2 × 12–15 · квадрицепсы','Вес, кг','Повторы по подходам'],['Сгибание ног лёжа','2 × 12–15 · задняя поверхность бедра','Вес, кг','Повторы по подходам'],['Жим от груди в тренажёре','2 × 10–12 · грудь, трицепс','Вес, кг','Повторы по подходам'],['Тяга верхнего блока','2 × 10–12 · спина','Вес, кг','Повторы по подходам'],['Горизонтальная тяга сидя','2 × 10–12 · спина','Вес, кг','Повторы по подходам'],['Разведение ног в тренажёре','2 × 12–15 · ягодичные','Вес, кг','Повторы по подходам'],['Сведение ног в тренажёре','2 × 12–15 · приводящие мышцы','Вес, кг','Повторы по подходам'],['Жим на плечи в тренажёре','2 × 10–12 · плечи','Вес, кг','Повторы по подходам'],['Гиперэкстензия','2 × 10–12 · без переразгибания поясницы','Доп. вес, кг','Повторы по подходам'],['Подъёмы коленей или ног в упоре','2 × 10–12 · пресс','Вариант','Повторы по подходам'],['Подтягивания в гравитроне (финиш)','2 × 8–10 · облегчённый вариант','Помощь, кг','Повторы по подходам']];
+const KEY='fullbody12-v2-couple',OLD_KEY='fullbody12-v1';
+let profiles={me:{},wife:{}};
+try{
+ const stored=JSON.parse(localStorage.getItem(KEY)||'null');
+ if(stored&&typeof stored==='object'&&!Array.isArray(stored)&&stored.me&&stored.wife)profiles=stored;
+ else profiles.me=JSON.parse(localStorage.getItem(OLD_KEY)||'{}')||{};
+}catch{}
+let activeProfile='me',db=profiles.me,selected=1;const $=id=>document.getElementById(id);const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const entry=()=>db[selected]||(db[selected]={items:{}});const save=()=>{profiles[activeProfile]=db;try{localStorage.setItem(KEY,JSON.stringify(profiles))}catch(err){console.warn("Storage unavailable",err)}refresh()};
+function switchProfile(name){activeProfile=name;db=profiles[name];selected=1;render();updateProfileButtons()}
+function updateProfileButtons(){
+ $('profileMe').className='btn'+(activeProfile==='me'?'':' secondary');
+ $('profileWife').className='btn'+(activeProfile==='wife'?'':' secondary');
+ $('profileNote').textContent=(activeProfile==='me'?'Мой дневник':'Дневник жены')+' · данные и графики отдельные. На другом телефоне записи автоматически не появятся.';
+}
+$('profileMe').onclick=()=>switchProfile('me');$('profileWife').onclick=()=>switchProfile('wife');function refresh(){weeklySummary();drawChart();const e=entry(),n=EX.filter((_,i)=>e.items[i]?.done).length;$('progress').style.width=(n/EX.length*100)+'%';$('progressText').textContent=`Выполнено ${n} из ${EX.length} упражнений`; $('status').textContent=Object.values(db).filter(w=>EX.every((_,i)=>w.items?.[i]?.done)).length+' из 12 завершено';document.querySelectorAll('.wk').forEach((b,i)=>{b.classList.toggle('active',i+1===selected);b.classList.toggle('done',EX.every((_,j)=>db[i+1]?.items?.[j]?.done))})}function normalizeItem(v,i){
+ if(!v||typeof v!=='object')return {};
+ if(i===0)return v;
+ if(!Array.isArray(v.sets)){
+  const parts=String(v.reps||'').split(/\s*[/;,]\s*/).filter(Boolean);
+  v.sets=parts.length?parts.map(reps=>({load:String(v.load||''),reps})):Array.from({length: i===1?3:2},()=>({load:String(v.load||''),reps:''}));
+ }
+ if(v.sets.length<1)v.sets=[{load:'',reps:''}];
+ return v;
+}
 function render(){
- const w=Number($("week").value),s=$("session").value,e=current();
- $("weekHint").textContent="Неделя "+w+" — "+weekNotes[w-1][0]+". "+weekNotes[w-1][1];
- $("sessionTitle").textContent=s==="A"?"Тренировка А — тяга и жим":"Тренировка Б — плечи, ноги и корпус";
- $("sessionBadge").textContent=workouts[s].length+" упражнений";
- $("skillText").textContent=s==="A"?skillA:skillB;
- $("sessionDate").value=e.date||"";
- $("sessionFeeling").value=e.feeling||"";
- $("sessionNotes").value=e.notes||"";
- $("exerciseList").innerHTML="";
- workouts[s].forEach((item,i)=>{
-  const d=e.exercises[i]||{};
-  const div=document.createElement("div");div.className="exercise"+(d.done?" done":"");
-  div.innerHTML=`<div class="ex-top"><input class="check" type="checkbox" aria-label="Выполнено"><div class="ex-name"></div><div class="plan"></div></div>
-  <div class="fields"><div><label>Рабочий вес / помощь</label><input class="weight" placeholder="кг / гравитрон"></div><div><label>Факт (повторы / сек.)</label><input class="fact" placeholder="Например, 3×3"></div></div>`;
-  div.querySelector(".check").checked=!!d.done;
-  div.querySelector(".ex-name").textContent=item[0];
-  div.querySelector(".plan").textContent=item[1];
-  div.querySelector(".weight").value=d.weight||"";
-  div.querySelector(".fact").value=d.fact||"";
-  div.querySelector(".check").addEventListener("change",ev=>{const x=current();x.exercises[i]={...x.exercises[i],done:ev.target.checked};div.classList.toggle("done",ev.target.checked);save()});
-  div.querySelector(".weight").addEventListener("input",ev=>{const x=current();x.exercises[i]={...x.exercises[i],weight:ev.target.value};save()});
-  div.querySelector(".fact").addEventListener("input",ev=>{const x=current();x.exercises[i]={...x.exercises[i],fact:ev.target.value};save()});
-  $("exerciseList").appendChild(div);
+ const e=entry();
+ $('weeks').innerHTML=Array.from({length:12},(_,i)=>`<button class="wk" data-w="${i+1}" aria-label="Неделя ${i+1}">${i+1}</button>`).join('');
+ document.querySelectorAll('.wk').forEach(b=>b.onclick=()=>{selected=+b.dataset.w;render()});
+ $('weekTitle').textContent='Неделя '+selected;
+ $('weekTip').textContent=selected===4||selected===8?'Облегчённая неделя при необходимости':selected===12?'Контроль результатов':selected<=2?'Подбор комфортной нагрузки':'Плавное повышение нагрузки';
+ $('date').value=e.date||'';$('feel').value=e.feel||'';$('notes').value=e.notes||'';
+ $('exerciseList').innerHTML=EX.map((x,i)=>{
+  const v=normalizeItem(e.items[i]||{},i);
+  const header=`<div class="ex"><label class="ex-title"><input type="checkbox" data-i="${i}" data-k="done" ${v.done?'checked':''}><span><span class="ex-name">${i+1}. ${x[0]}</span><div class="ex-hint">${x[1]} · количество подходов выбираешь сам</div></span></label>`;
+  if(i===0)return header+`<div class="fields"><label>Время, мин<input type="text" data-i="0" data-k="load" value="${escapeHtml(v.load||'')}" placeholder="Напр. 12"></label><label>Сопротивление<input type="text" data-i="0" data-k="reps" value="${escapeHtml(v.reps||'')}" placeholder="Уровень"></label></div></div>`;
+  const options=Array.from({length:6},(_,j)=>`<option value="${j+1}" ${v.sets.length===j+1?'selected':''}>${j+1}</option>`).join('');
+  const sets=v.sets.map((set,j)=>`<div class="set-row"><span class="set-number">№ ${j+1}</span><label>${x[2]}<input type="text" data-i="${i}" data-set="${j}" data-field="load" value="${escapeHtml(set.load||'')}" placeholder="—"></label><label>Повторы<input type="number" min="0" max="100" step="1" data-i="${i}" data-set="${j}" data-field="reps" value="${escapeHtml(set.reps??'')}" placeholder="0"></label></div>`).join('');
+  return header+`<div class="set-controls"><label for="count-${i}">Подходов:</label><select id="count-${i}" data-count="${i}">${options}</select></div><div class="set-list">${sets}</div><div class="set-summary">Каждый подход: свой вес и фактические повторы.</div></div>`;
+ }).join('');
+ $('exerciseList').querySelectorAll('input[data-k]').forEach(inp=>inp.addEventListener(inp.type==='checkbox'?'change':'input',()=>{
+  const i=+inp.dataset.i,v=entry().items[i]||(entry().items[i]={});
+  v[inp.dataset.k]=inp.type==='checkbox'?inp.checked:inp.value;save();
+ }));
+ $('exerciseList').querySelectorAll('input[data-set]').forEach(inp=>inp.addEventListener('input',()=>{
+  const i=+inp.dataset.i,v=entry().items[i]||(entry().items[i]={});
+  normalizeItem(v,i);v.sets[+inp.dataset.set][inp.dataset.field]=inp.value;save();
+ }));
+ $('exerciseList').querySelectorAll('select[data-count]').forEach(sel=>sel.addEventListener('change',()=>{
+  const i=+sel.dataset.count,v=entry().items[i]||(entry().items[i]={});
+  normalizeItem(v,i);const n=+sel.value;
+  while(v.sets.length<n)v.sets.push({load:'',reps:''});
+  if(v.sets.length>n)v.sets=v.sets.slice(0,n);
+  save();render();
+ }));
+ refresh();
+}
+$('date').onchange=e=>{entry().date=e.target.value;save()};$('feel').onchange=e=>{entry().feel=e.target.value;save()};$('notes').oninput=e=>{entry().notes=e.target.value;save()};$('export').onclick=()=>{const blob=new Blob([JSON.stringify({app:'fullbody12-couple',version:2,profiles:profiles},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='fullbody-12-weeks-couple-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};$('importBtn').onclick=()=>$('importFile').click();$('importFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const obj=JSON.parse(await f.text());if(!confirm('Заменить текущие записи данными из резервной копии?'))return;
+if(obj.app==='fullbody12-couple'&&obj.profiles&&typeof obj.profiles==='object'&&obj.profiles.me&&obj.profiles.wife){profiles={me:obj.profiles.me,wife:obj.profiles.wife}}
+else if(obj.app==='fullbody12'&&obj.data&&typeof obj.data==='object'&&!Array.isArray(obj.data)){profiles[activeProfile]=obj.data}
+else throw Error('Неверный формат');
+db=profiles[activeProfile];save();render();updateProfileButtons();alert('Данные загружены')}catch(err){alert('Не удалось загрузить файл: '+err.message)}e.target.value=''};
+function numValue(v){
+ const m=String(v??'').trim().replace(',','.').match(/-?\d+(?:\.\d+)?/);
+ return m?Number(m[0]):null;
+}
+function itemReps(v){if(Array.isArray(v?.sets))return v.sets.reduce((a,x)=>a+(numValue(x.reps)||0),0);return repsTotal(v?.reps)}
+function itemLoad(v){if(Array.isArray(v?.sets)){const a=v.sets.map(x=>numValue(x.load)).filter(x=>x!==null);return a.length?a[a.length-1]:null}return numValue(v?.load)}
+function repsTotal(v){
+ const str=String(v??'').trim();
+ if(!str)return null;
+ const values=str.replace(/,/g,'.').match(/\d+(?:\.\d+)?/g);
+ return values?values.reduce((a,b)=>a+Number(b),0):null;
+}
+function fmt(v){return Number.isFinite(v)?new Intl.NumberFormat('ru-RU',{maximumFractionDigits:1}).format(v):'—'}
+function metrics(w){
+ const items=w?.items||{};
+ const completed=EX.filter((_,i)=>items[i]?.done).length;
+ const reps=EX.reduce((sum,x,i)=>sum+(items[i]?.done&&i!==0?itemReps(items[i])||0:0),0);
+ const cardio=items[0]?.done?numValue(items[0].load):null;
+ return {completed,reps,cardio};
+}
+function delta(now,prev,unit='',inverse=false){
+ if(now===null||prev===null)return '—';
+ const d=now-prev;
+ if(Math.abs(d)<.001)return 'без изменений';
+ const good=inverse?d<0:d>0;
+ return `<span class="${good?'up':'down'}">${d>0?'+':''}${fmt(d)}${unit}</span>`;
+}
+function weeklySummary(){
+ const w=selected,cur=db[w]||{},m=metrics(cur);
+ const prior=Array.from({length:w-1},(_,i)=>i+1).reverse().find(k=>db[k]&&Object.values(db[k].items||{}).some(x=>x.done));
+ const prev=prior?metrics(db[prior]):null;
+ let html=`<div class="summary-grid"><div class="summary-stat"><strong>${m.completed} / ${EX.length}</strong><span>Упражнений выполнено</span></div><div class="summary-stat"><strong>${m.reps||'—'}</strong><span>Всего повторений (по введённым данным)</span></div><div class="summary-stat"><strong>${m.cardio===null?'—':fmt(m.cardio)+' мин'}</strong><span>Эллипс</span></div><div class="summary-stat"><strong>${cur.feel?escapeHtml(cur.feel):'—'}</strong><span>Самочувствие</span></div></div>`;
+ if(prev){
+  html+=`<p class="summary-message">Сравнение с неделей ${prior}: выполнено ${delta(m.completed,prev.completed)} упражнений, повторений ${delta(m.reps,prev.reps)}. Разница в количестве повторений не учитывает изменение рабочего веса и не означает автоматически рост силы.</p>`;
+ }else html+='<p class="summary-message">Это первая заполненная неделя. После следующей тренировки здесь появится сравнение с предыдущими записями.</p>';
+ const rows=[];
+ EX.forEach((x,i)=>{
+  if(i===0||i===11)return;
+  const current=cur.items?.[i];
+  if(!current?.done)return;
+  const old=prior?db[prior]?.items?.[i]:null;
+  const load=itemLoad(current),oldLoad=old?.done?itemLoad(old):null;
+  const reps=itemReps(current),oldReps=old?.done?itemReps(old):null;
+  const loadUnit=i===1||i===12?' кг помощи':' кг';
+  const loadLabel=i===1||i===12?'Помощь':'Вес';
+  rows.push(`<tr><td>${escapeHtml(x[0])}</td><td>${loadLabel}: ${load===null?'—':fmt(load)+loadUnit}<div class="muted">${oldLoad===null?'Нет сравнения':delta(load,oldLoad,' кг',i===1||i===12)}</div></td><td>${reps===null?'—':fmt(reps)}<div class="muted">${oldReps===null?'Нет сравнения':delta(reps,oldReps)}</div></td></tr>`);
  });
- updateStats();
+ if(rows.length)html+=`<div style="overflow-x:auto"><table class="comparison"><thead><tr><th>Упражнение</th><th>Нагрузка и изменение</th><th>Повторы и изменение</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>`;
+ html+='<p class="note">Сравнение использует последнюю предыдущую неделю с отмеченными упражнениями. Для корректного подсчёта указывай повторы и вес отдельно для каждого подхода. Изменения нагрузки и повторений показаны отдельно; у гравитрона меньшая помощь означает большую нагрузку. На облегчённых неделях снижение показателей нормально.</p>';
+ $('weeklySummary').innerHTML=html;
 }
-function updateStats(){
- let done=0,total=0;
- Object.values(state.entries).forEach(e=>Object.values(e.exercises||{}).forEach(x=>{total++;if(x.done)done++}));
- $("doneCount").textContent=done;$("totalCount").textContent=96;
- const p=Math.round(done/96*100);$("percent").textContent=p+"%";$("bar").style.width=p+"%";
+
+function metricAt(w,key){
+ const e=db[w],it=e?.items||{};
+ if(!e)return null;
+ if(key==='completed')return Object.values(it).some(v=>v.done)?metrics(e).completed:null;
+ if(key==='reps')return Object.values(it).some(v=>v.done&&(v.reps||v.sets?.some(s=>s.reps)))?metrics(e).reps:null;
+ if(key==='cardio')return it[0]?.done?numValue(it[0].load):null;
+ const map={pullAssist:[1,'load'],pullReps:[1,'reps'],chest:[4,'load'],legs:[2,'load'],row:[6,'load']};
+ const [i,k]=map[key];if(!it[i]?.done)return null;
+ return k==='reps'?itemReps(it[i]):itemLoad(it[i]);
 }
-function saveProfile(){
- ["basePull","nowPull","basePush","nowPush","baseHang","nowHang","nextGoals"].forEach(id=>state.profile[id]=$(id).value);
- save();
+function drawChart(){
+ const target=$('progressChart');if(!target)return;
+ const key=$('chartMetric').value;
+ const vals=Array.from({length:12},(_,i)=>metricAt(i+1,key));
+ const good=vals.map((v,i)=>v===null?null:{w:i+1,v}).filter(Boolean);
+ if(!good.length){target.innerHTML='<p class="note">Пока нет данных для этого показателя. Заполни тренировку и отметь упражнение выполненным.</p>';$('chartSummary').textContent='';return}
+ const width=340,height=225,left=42,right=14,top=18,bottom=38;
+ let low=Math.min(...good.map(p=>p.v)),high=Math.max(...good.map(p=>p.v));
+ const pad=Math.max((high-low)*.16,high===low?Math.max(Math.abs(high)*.1,1):.5);
+ low=Math.max(0,low-pad);high=high+pad;
+ const x=w=>left+(w-1)*(width-left-right)/11;
+ const y=v=>top+(high-v)*(height-top-bottom)/(high-low);
+ const esc=t=>escapeHtml(t);
+ let svg=`<svg viewBox="0 0 ${width} ${height}" width="100%" style="display:block;max-height:290px" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">`;
+ for(let j=0;j<4;j++){
+  const val=low+(high-low)*j/3,yy=y(val);
+  svg+=`<line x1="${left}" y1="${yy}" x2="${width-right}" y2="${yy}" stroke="#e3eaee"/><text x="${left-7}" y="${yy+4}" text-anchor="end" fill="#667884" font-size="10">${esc(fmt(val))}</text>`;
+ }
+ for(let i=1;i<=12;i++)svg+=`<text x="${x(i)}" y="${height-13}" text-anchor="middle" fill="#667884" font-size="10">${i}</text>`;
+ // Connect only adjacent recorded weeks; gaps remain gaps.
+ for(let i=0;i<11;i++)if(vals[i]!==null&&vals[i+1]!==null)svg+=`<line x1="${x(i+1)}" y1="${y(vals[i])}" x2="${x(i+2)}" y2="${y(vals[i+1])}" stroke="#08776a" stroke-width="2.5" stroke-linecap="round"/>`;
+ good.forEach(p=>{svg+=`<circle cx="${x(p.w)}" cy="${y(p.v)}" r="4.5" fill="#08776a" stroke="white" stroke-width="1.5"><title>Неделя ${p.w}: ${esc(fmt(p.v))}</title></circle>`});
+ svg+='</svg>';
+ target.innerHTML=svg;
+ const first=good[0],last=good[good.length-1];
+ $('chartSummary').textContent=`Заполнено недель: ${good.length} из 12. Первая запись: неделя ${first.w} — ${fmt(first.v)}; последняя: неделя ${last.w} — ${fmt(last.v)}. ${key==='pullAssist'?'Для гравитрона уменьшение помощи при равных повторах означает повышение нагрузки.':''}`;
 }
-load();
-for(let i=1;i<=8;i++){const o=document.createElement("option");o.value=i;o.textContent="Неделя "+i;$("week").appendChild(o)}
-$("week").addEventListener("change",render);$("session").addEventListener("change",render);
-["sessionDate","sessionFeeling","sessionNotes"].forEach(id=>$(id).addEventListener("input",()=>{const e=current();if(id==="sessionDate")e.date=$(id).value;if(id==="sessionFeeling")e.feeling=$(id).value;if(id==="sessionNotes")e.notes=$(id).value;save()}));
-["basePull","nowPull","basePush","nowPush","baseHang","nowHang","nextGoals"].forEach(id=>$(id).addEventListener("input",saveProfile));
-Object.entries(state.profile||{}).forEach(([id,v])=>{if($(id))$(id).value=v});
-$("exportBtn").addEventListener("click",()=>{
- const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
- const url=URL.createObjectURL(blob),a=document.createElement("a");
- a.href=url;a.download="moj-vorkaut-dnevnik-backup.json";a.click();URL.revokeObjectURL(url);
- $("backupMsg").textContent="Копия записей подготовлена для сохранения в Файлы.";
-});
-$("importBtn").addEventListener("click",()=>$("importFile").click());
-$("importFile").addEventListener("change",async ev=>{
- const f=ev.target.files[0];if(!f)return;
- try{const imported=JSON.parse(await f.text());if(!imported.entries)throw new Error();state=imported;save();Object.entries(state.profile||{}).forEach(([id,v])=>{if($(id))$(id).value=v});render();$("backupMsg").textContent="Копия успешно загружена."}
- catch(e){$("backupMsg").textContent="Не удалось прочитать файл копии."}
-});
-render();
-</script>
-</body>
-</html>
+$('chartMetric').onchange=drawChart;
+
+render();updateProfileButtons();
+</script></body></html>
